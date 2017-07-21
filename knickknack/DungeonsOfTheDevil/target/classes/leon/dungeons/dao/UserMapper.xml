@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="leon.dungeons.dao.UserMapper">
+
+	<!-- 创建 (注册)用户 -->
+	<insert id="createUser" parameterType="User">
+		INSERT INTO
+		user_info
+		(user_id,user_name,user_nickname,user_password,user_level,user_talent1,
+		user_talent2,user_talent3,user_map1,user_map2,user_map3)
+		VALUES(
+		#{userId},#{userName},#{userNickname},#{userPassword},#{userLevel},
+		#{userTalent.userTalent1},#{userTalent.userTalent2},#{userTalent.userTalent3},
+		#{userMap.userMap1},#{userMap.userMap2},#{userMap.userMap3}
+		);
+	</insert>
+
+	<!-- 查询用户所属地图的json数据 -->
+	<select id="lodingUserMap" parameterType="java.lang.String" resultType="GameMap">
+		SELECT map_no map_no, map_json landform FROM map_info WHERE map_no IN (
+			( SELECT user_map1 FROM user_info WHERE 
+				user_id = #{userId}
+			),
+			( SELECT user_map2 FROM user_info WHERE
+				user_id = #{userId}
+			),
+			( SELECT user_map3 FROM user_info WHERE
+				user_id = #{userId}
+			)
+		);
+	</select>
+</mapper>
