@@ -1,0 +1,154 @@
+package leon.test.utils;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
+import leon.base.constant.ExInfoConstant;
+import leon.log.utils.Log4JUtils;
+import leon.nonclassified.NonClassified;
+
+/**
+ * 
+ ********************************************************************************
+ * 
+ * <p>为测试类定做的测试结果输出工具，该类用来格式化的输出测试结果
+ * 
+ * <p>格式：
+ * <p>类:[leon.test.utils.TstResultPrnUtils]--方法:[prnResult]--行号:(34)
+ * <p>参数:		str			:		这是一个测试字符串
+ * <p>参数:		bgStr		:		是
+ * <p>参数:		endStr		:		字
+ * <p>result:是一个测试
+ *
+ * @author LeonLee
+ * @date 2017年5月19日 上午9:55:36 
+ *
+ ********************************************************************************
+ *
+ */
+public class TstResultPrnUtilsbak {
+	
+	/*
+	 * 这是一个方法名，每个测试类内都应该有以这个名字命名的方法，并在这个方法内调用待测方法
+	 * 具体示例如下
+	 * eg:
+	 * private String testMeth(String str, String bgStr, String endStr) {//私有方法 返回值与待测方法一致 方法名必须问TEST_METH_FIELD_NAME的值
+	 * 		return StringUtils.getSubstring(str, bgStr, endStr);//待测试方法
+	 * }
+	 */
+	private static final String	TEST_METH_FIELD_NAME	= "testMeth";
+	
+	/**
+	 * 输出有关线程、类名、方法名的信息有关的下标
+	 * Thread.currentThread().getStackTrace()[stackIndex]
+	 */
+	private static final int	DEF_STACKINDEX			= 3;
+	
+	private TstResultPrnUtilsbak() {}
+	
+	/**
+	 * 
+	 ********************************************************************************
+	 * 
+	 * <p>KW:测试工具类、参数非null
+	 *
+	 * <p>用于测试有参数值，且参数不为<code>(null)</code>情况下的方法
+	 * 
+	 * <p>内联调用了{@link #prnResult(Class clz, Object[] arg, Class[] clzs)}
+	 * 
+	 * @param clz
+	 * @param arg
+	 * @author LeonLee
+	 * @date 2017年5月20日 上午10:07:58 
+	 * 
+	 ********************************************************************************
+	 *
+	 */
+	@SuppressWarnings("rawtypes")
+	public static void prnResult(Class clz, Object[] arg) {
+		prnResult(clz, arg, DEF_STACKINDEX);
+	}
+	
+	/**
+	 * 
+	 ********************************************************************************
+	 * 
+	 * <p>KW:测试工具类、指定参数类型
+	 *
+	 * <p>用于测试有参数值，参数可以为<code>(null)</code>，但是必须指定参数类型<code>clzs</code>
+	 * 
+	 * <p>内联调用了{@link #prnResult(Class clz, Object[] arg, int stackIndex, Class[] clzs) }
+	 * 
+	 * @param clz
+	 * @param arg
+	 * @param clzs
+	 * @author LeonLee
+	 * @date 2017年5月20日 上午10:11:02 
+	 * 
+	 ********************************************************************************
+	 *
+	 */
+	@SuppressWarnings("rawtypes")
+	public static void prnResult(Class clz, Object[] arg, Class[] clzs) {
+		prnResult(clz, arg, DEF_STACKINDEX, clzs);
+	}
+	
+	/**
+	 * 
+	 ********************************************************************************
+	 * 
+	 * <p>KW:测试工具类、指定参数类型、指定{@link #DEF_STACKINDEX}下标
+	 *
+	 * <p>用于测试有参数值，参数不以为<code>(null)</code>，但是必须指定参数类型<code>clzs</code>
+	 * 
+	 * <p>内联调用了{@link #prnResult(Class clz, Object[] arg, int stackIndex, Class[] clzs) }
+	 * 
+	 * @param clz
+	 * @param arg
+	 * @param stackIndex
+	 * @author LeonLee
+	 * @date 2017年5月20日 上午10:14:10 
+	 * 
+	 ********************************************************************************
+	 *
+	 */
+	@SuppressWarnings("rawtypes")
+	public static void prnResult(Class clz, Object[] arg, int stackIndex) {
+		Class[] argClzs = new Class[arg.length];
+		for (int i = 0; i < argClzs.length; i++) {
+			if (arg[i] == null) {
+				throw new RuntimeException(ExInfoConstant.ARG_NON_NULL_INFO);
+			}
+			argClzs[i] = arg[i].getClass();
+		}
+		prnResult(clz, arg, DEF_STACKINDEX, argClzs);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public static void prnResult(Class clz, Object[] arg, int stackIndex, Class[] clzs) {
+		System.out.println();
+		System.out.println(NonClassified.printCalledInfo(Thread.currentThread().getStackTrace()[stackIndex]));
+		Field[] fields = clz.getDeclaredFields();
+		Object result = null;
+		try {
+			for (int i = 0; i < fields.length; i++) {
+				fields[i].setAccessible(true);
+				String fieldName = fields[i].getName();
+				System.out.println("参数:		" + fieldName + "		:		" + arg[i]);
+			}
+			Class[] argClzs = new Class[arg.length];
+			for (int i = 0; i < clzs.length; i++) {
+				argClzs[i] = clzs[i];
+			}
+			@SuppressWarnings({ "unchecked" })
+			Method method = clz.getDeclaredMethod(TEST_METH_FIELD_NAME, clzs);
+			method.setAccessible(true);//抑制Java的访问控制检查
+			result = method.invoke(clz.newInstance(), arg);
+		} catch (Exception e) {
+			Log4JUtils.debug(ExInfoConstant.TEST_UTILS_PRNRESULT_DEBUG, e);
+		}
+		System.out.println("result		:		" + result);
+		System.out.println();
+	}
+	
+}
