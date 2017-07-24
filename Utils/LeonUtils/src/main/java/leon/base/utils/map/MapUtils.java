@@ -8,6 +8,7 @@ import leon.base.constant.ExInfoConstant;
 import leon.base.utils.BaseUtils;
 
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * *******************************************************************************
@@ -73,5 +74,29 @@ public class MapUtils {
 		} else {
 			throw new RuntimeException(ExInfoConstant.ARG_NON_NULL_INFO);
 		}
+	}
+	
+	/**
+	 * 
+	 **************************************************
+	 *
+	 * @deprecated:		根据Map中的Key值来对Map中的内容进行排序
+	 * 					<p>使用的是{@link java.util.TreeMap}来实现的
+	 * 					<p>返回的Map实质上是一个TreeMap
+	 *
+	 *
+	 * @author:			Leon
+	 * @version:		1.0
+	 * @date:			2017年7月21日 下午4:59:21
+	 *
+	 * @param map
+	 * @return 
+	 **************************************************
+	 *
+	 */
+	public static <K,V> Map<K,V> srotByKey(Map<K,V> map){
+		Map<K,V> result = new TreeMap<K,V>();
+		result.putAll(map);
+		return  result;
 	}
 }
